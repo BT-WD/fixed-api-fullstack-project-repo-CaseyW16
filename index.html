@@ -3,9 +3,27 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" href="index.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400..900;1,400..900&family=Sofia+Sans+Extra+Condensed:ital,wght@0,1..1000;1,1..1000&family=Special+Elite&display=swap" rel="stylesheet">
+
     <title>API Full Stack Project</title>
   </head>
   <body>
     <!-- You code goes here-->
+    <h2 id="score">0</h2>
+    <h3 id="score-info">in a row</h3>
+    <h2 id="high-score">0</h2>
+    <h3 id="high-score-info">highscore</h3>
+    <div id="text-container">
+      <p id="text-block"><br>This is an example text and <span autofocus secretindex="0" spellcheck="false" contenteditable="true" class="redacted"></span> is the hidden text. Blah Blah Blah Blah Blah Blah Blah Blah Blah Blah Blah Blah Blah Blah Blah Blah Blah Blah Blah Blah Blah Blah Blah Blah Blah Blah Blah.</p>
+      <div id="btn-holder">
+        <button id="continue-btn" disabled>enter a guess</button>
+      </div>
+    </div>
+    <template id="real-answer-template"><p class="real-answer"></p></template>
+    <template id="article-link-template"><div id="article-link">from '<a href="wikipedia.com">Article name</a>'</div></template>
   </body>
+  <script src="index.js"></script>
 </html>

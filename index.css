@@ -1,1 +1,159 @@
+body {
+    font-family: 'Special Elite';
+    user-select: none;
+}
 
+#text-container {
+    position: absolute;
+    width: 30%;
+    z-index: 20;
+    left: 50%;
+    top: 45%;
+    transform: translate(-50%, -50%);
+}
+
+p {
+    font-size: 30px;
+}
+
+h2 {
+    font-weight: 200;
+    font-size: 90px;
+}
+
+#score {
+    position: absolute;
+    left: 15px;
+    top: -50px;
+}
+
+#score-info {
+    position: absolute;
+    left: 20px;
+    top: 70px;
+}
+
+#high-score {
+    position: absolute;
+    right: 15px;
+    top: -50px;
+}
+
+#high-score-info {
+    text-align: right;
+    position: absolute;
+    right: 20px;
+    top: 70px;
+}
+
+h3 {
+    font-size: 30px;
+    font-weight: 100;
+    color: rgb(150,150,150);
+}
+
+.redacted {
+    display: inline-block;
+    text-align: center;
+    background-color: black;
+    color: white;
+    cursor: text;
+    min-width: 80px;
+    height: 30px;
+    vertical-align: top;
+    outline: none;
+    padding-left: 5px;
+    padding-right: 5px;
+    max-width: 5000px;
+    caret-color: white;
+    transform: translate(0,0);
+    box-shadow: 0px 0px 0px 0px rgba(0,0,0,.3);
+    transition: all 1s;
+}
+
+.real-answer {
+    display: inline-block;
+    font-size: 30px;
+    z-index: 5;
+    text-align: center;
+}
+
+#article-link {
+    position: absolute;
+    font-family: "Playfair Display";
+    font-size: 25px;
+    font-weight: 100;
+    top: 15%;
+    left: 50%;
+    transform: translate(-50%,-50%);
+    font-style: italic;
+    opacity: 0;
+    color:rgb(210,210,210);
+    animation: fadeIn 1s ease-in forwards;
+}
+
+a {
+    color:rgb(210,210,210);
+    transition: all 0.2s;
+}
+
+a:hover {
+    color:rgb(50,50,50);
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.float {
+    transform: translate(0, -80px);
+    box-shadow: 0px 80px 16px 0px rgba(0,0,0,0.15);
+    cursor: default;
+    z-index: 200;
+}
+
+.redacted::selection {
+    background-color: rgb(150,150,150);
+}
+
+.correct {
+    color:rgb(20, 114, 31);
+}
+
+.incorrect {
+    color: rgb(165, 165, 165);
+}
+
+
+button {
+    margin-top: 50px;
+    position: absolute;
+    left: 50%;
+    align-self: center;
+    font-size: 20px;
+    font-weight: 200;
+    font-family: 'Playfair Display';
+    background-color: rgb(245, 245, 245);
+    padding: 10px;
+    border: none;
+    opacity: 1;
+    outline: 2px solid rgb(187, 187, 187);
+    transform: translate(-50%);
+    transition: all 0.1s;
+}
+
+button:disabled {
+    cursor: not-allowed;
+}
+
+button:enabled {
+    color: black;
+    cursor: pointer;
+}
+
+button:hover:not(:disabled) {
+    background-color: rgb(255,255,255);
+    transform: translate(-50%, -5px);
+    box-shadow: 0px 6px 5px 0px rgba(0,0,0,0.15);
+}
