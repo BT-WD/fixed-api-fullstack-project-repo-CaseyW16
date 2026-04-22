@@ -85,16 +85,29 @@ const articleLinkTemplate = document.getElementById("article-link-template");
 const scoreCounter = document.getElementById("score");
 const highscoreCounter = document.getElementById("high-score");
 
+var scaleFactor = 1;
+
+function setScale() {
+    // const baselineHeight = 1080; 
+    // const currentHeight = window.innerHeight;
+    // scaleFactor = currentHeight / baselineHeight;
+    scaleFactor = 0.5;
+    document.documentElement.style.setProperty('--scale-factor', scaleFactor);
+    // console.log(scaleFactor)
+}
+
+setScale();
 
 window.addEventListener("resize", () => {
+    setScale();
+
     console.log("resized!")
     const realAnswers = document.querySelectorAll('.real-answer-added');
     realAnswers.forEach((ans) => {
-        console.log("A!");
         const correspondingBox = redactedBoxes[ans.getAttribute("secretindex")][2];
         const rect = correspondingBox.getBoundingClientRect();
 
-        const absoluteTop = rect.top + window.scrollY + 50;
+        const absoluteTop = rect.top + window.scrollY + 50 * (scaleFactor * (0.2/0.5));
         const absoluteLeft = rect.left + window.scrollX;
         
         ans.style.position = 'absolute';
@@ -191,7 +204,7 @@ submitBtn.addEventListener('click', () => {
 });
 
 window.addEventListener('beforeunload', (event) => {
-    event.preventDefault();
+    //event.preventDefault();
     if (score > localStorage.getItem("highscore")) {
         highscoreCounter.textContent = score;
         localStorage.setItem("highscore", score);
