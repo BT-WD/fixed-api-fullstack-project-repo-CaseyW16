@@ -1,9 +1,9 @@
+:root { --scale-factor: .5; }
+
 body {
     font-family: 'Special Elite';
     user-select: none;
 }
-
-:root { --scale-factor: .5; }
 
 #text-container {
     position: absolute;

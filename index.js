@@ -1,44 +1,59 @@
-const submitBtn = document.getElementById('continue-btn');
-
-
-var redactedBoxes = [['fibrous', '', null]];
-var boxes = 1;
-var boxesWithText = 0;
+var redactedBoxes = [['', '', null]];
 var score = 0;
-
+var secretArticleName;
+var secretArticleURL;
 
 function getTextWidth(text, font) {
-  // Create a dummy canvas to use its context
-  const canvas = document.createElement("canvas");
-  const context = canvas.getContext("2d");
+    const canvas = document.createElement("canvas");
+    const context = canvas.getContext("2d");
  
-  // Apply the same font style as your target text
-  context.font = font;
- 
-  // Measure and return the width
-  const metrics = context.measureText(text);
-  return metrics.width;
+    context.font = font;
+    const metrics = context.measureText(text);
+    return metrics.width;
 }
-
-
-
 
 const textContainer = document.getElementById("text-container");
 const textBlock = document.getElementById("text-block");
+const submitBtn = document.getElementById('continue-btn');
 
+function typeTextSlowly(textToType, index, skipIndexStart, skipIndexEnd) {
+    if (index < textToType.length) {
+        if (index == skipIndexStart) {
+            textBlock.innerHTML += textToType.substring(skipIndexStart, skipIndexEnd);
+            index = skipIndexEnd;
+        } else {
+            textBlock.innerHTML += textToType.charAt(index);
+        }
+        setTimeout(function () {
+            typeTextSlowly(textToType, index + 1, skipIndexStart, skipIndexEnd);
+        }, 10);
+    } else {
+        finishTyping();
+    }
+}
 
-function loadNewParagraph(paragraph) {
+async function loadNewParagraph(article) {
+    paragraph = article.summary
+    secretArticleName = article.title;
+    secretArticleURL = article.link;
+
     var validSecretWord = false;
     const words = paragraph.split(" ");
     var secretWordIndex;
     var secretWord;
 
-    while (!validSecretWord) {
+    var attempts = 0;
+    while (!validSecretWord && attempts < 5) {
         secretWordIndex = Math.floor(Math.random() * words.length);
         secretWord = words[secretWordIndex];
-        console.log("Secret word: " + secretWord);
-        console.log("Is valid: " + isValidWord(secretWord))
-        validSecretWord = isValidWord(secretWord);
+        var valid = await isValidWord(secretWord);
+        validSecretWord = valid;
+        attempts++;
+    }
+    if (!validSecretWord) {
+        var article = await getRandomArticle();
+        loadNewParagraph(article);
+        return;
     }
 
     var finalHtml = '';
@@ -47,29 +62,26 @@ function loadNewParagraph(paragraph) {
             finalHtml += " ";
         }
         if (i == secretWordIndex) {
-            console.log("AH");
             finalHtml += '<span autofocus secretindex="0" spellcheck="false" contenteditable="true" class="redacted"></span>';
         } else {
             finalHtml += words[i]
         }
     }
 
-    console.log("words: " + words);
-    console.log("secretWordIndex: " + secretWordIndex);
     redactedBoxes[0] = [secretWord.toString(), '', null];
-    textBlock.innerHTML = finalHtml;
+    const skipStart = finalHtml.indexOf("<span");
+    const skipEnd = finalHtml.indexOf("</span>") + 6;
+    textBlock.innerHTML = '';
+    typeTextSlowly(finalHtml, 0, skipStart, skipEnd)
+}
 
-
+function finishTyping() {
     const redactedElements = document.querySelectorAll('.redacted');
-
-
     redactedElements.forEach(element => {
         element.addEventListener('input', () => {
             const box = redactedBoxes[element.getAttribute('secretindex')];
-            console.log(box);
             box[2] = element;
             box[1] = element.textContent;
-
 
             var moreInputRequired = false;
             redactedBoxes.forEach((box) => {
@@ -100,53 +112,37 @@ function loadNewParagraph(paragraph) {
     });
 }
 
-
-
-
 const realAnswerTemplate = document.getElementById('real-answer-template');
 const articleLinkTemplate = document.getElementById("article-link-template");
 const scoreCounter = document.getElementById("score");
 const highscoreCounter = document.getElementById("high-score");
 
-
-var scaleFactor = 1;
-
-
 function setScale() {
-    // const baselineHeight = 1080;
-    // const currentHeight = window.innerHeight;
-    // scaleFactor = currentHeight / baselineHeight;
-    scaleFactor = .75;
+    var scaleFactor = .6;
     document.documentElement.style.setProperty('--scale-factor', scaleFactor);
-    // console.log(scaleFactor)
 }
-
 
 setScale();
 
-
-window.addEventListener("resize", () => {
-    setScale();
-
-
-    console.log("resized!")
+function setRealAnswerPositions() {
     const realAnswers = document.querySelectorAll('.real-answer-added');
     realAnswers.forEach((ans) => {
         const correspondingBox = redactedBoxes[ans.getAttribute("secretindex")][2];
         const rect = correspondingBox.getBoundingClientRect();
 
-
-        const absoluteTop = rect.top + window.scrollY + 30;
+        const absoluteTop = rect.top + window.scrollY + 17;
         const absoluteLeft = rect.left + window.scrollX;
        
         ans.style.position = 'absolute';
         ans.style.top = absoluteTop + 'px';
         ans.style.left = absoluteLeft + 'px';
     });
+}
+
+window.addEventListener("resize", () => {
+    setScale();
+    setRealAnswerPositions();
 })
-
-
-
 
 submitBtn.addEventListener('click', async () => {
     if (submitBtn.textContent == "submit guess") {
@@ -154,54 +150,31 @@ submitBtn.addEventListener('click', async () => {
         redactedBoxes.forEach((box) => {
             submitBtn.hidden = true;
             submitBtn.style.opacity = "0";
-
-
             const secretWord = box[0];
             const enteredWord = box[1];
-           
             const boxObj = box[2];
-
-
             boxObj.setAttribute("contenteditable", false);
-
-
             boxObj.style.minWidth = "0px";
-           
             const clone = realAnswerTemplate.content.cloneNode(true).firstElementChild;
             clone.textContent = secretWord;
-
-
             clone.setAttribute("secretindex", i);
             clone.classList.add("real-answer-added");
-
-
             const rect = boxObj.getBoundingClientRect();
-
-
             const absoluteTop = rect.top + window.scrollY - 30;
             const absoluteLeft = rect.left + window.scrollX;
-           
             clone.style.position = 'absolute';
             clone.style.top = absoluteTop + 'px';
             clone.style.left = absoluteLeft + 'px';
-
-
             const realWidth = getTextWidth(secretWord, "30px Special Elite")
             const guessWidth = getTextWidth(enteredWord, "30px Special Elite")
-
-
             boxObj.style.width = Math.max(80,guessWidth) + 'px';
-            if (guessWidth > realWidth) {
-            }
-                clone.style.width = boxObj.style.width;
-
+            clone.style.width = boxObj.style.width;
 
             setTimeout(() => {
                 if (guessWidth < realWidth) {
                     boxObj.style.width = realWidth + 'px';
                 }
             }, 500);
-
 
             setTimeout(() => {
                 document.body.appendChild(clone);
@@ -219,22 +192,24 @@ submitBtn.addEventListener('click', async () => {
                 }
             }, 1500);
 
-
             setTimeout(() => {
                 const articleLink = articleLinkTemplate.content.cloneNode(true).firstElementChild;
+                articleLink.innerHTML = `from '<a href="${secretArticleURL}">${secretArticleName}</a>'`
                 clone.textContent = secretWord;
                 document.body.appendChild(articleLink);
                 submitBtn.hidden = false;
                 submitBtn.style.opacity = "1";
                 submitBtn.textContent = secretWord == enteredWord ? "continue" : "try again"
                 scoreCounter.textContent = score;
+                setRealAnswerPositions();
             }, 3000)
+
             i += 1;
         })
     } else if (submitBtn.textContent == "try again" || submitBtn.textContent == "continue") {
         var a = await getRandomArticle();
-        console.log(a.title);
-        loadNewParagraph(a.summary)
+        loadNewParagraph(a)
+
         submitBtn.textContent = "enter a guess";
         submitBtn.disabled = true;
         document.getElementById("article-link").remove();
@@ -243,10 +218,7 @@ submitBtn.addEventListener('click', async () => {
             ans.remove();
         });
     }
-
-
 });
-
 
 window.addEventListener('beforeunload', (event) => {
     //event.preventDefault();
@@ -255,7 +227,6 @@ window.addEventListener('beforeunload', (event) => {
         localStorage.setItem("highscore", score);
     }
 });
-
 
 if (!localStorage.getItem("highscore")) {
     localStorage.setItem("highscore", 0);
@@ -272,17 +243,21 @@ class Article {
 }
 
 
-function isValidWord(word) {
-    return (/^[a-z]+$/).test(word);
+async function isValidWord(word) {
+    if ((/^[a-z]+$/).test(word) && word.length >= 4) {
+        const response = await fetch(`https://api.dictionaryapi.dev/api/v2/entries/en/${word}`);
+        return response.ok;
+    }
+    return false;
 }
 
-loadNewParagraph("Fill the blank to begin the game");
 async function getRandomArticle() {
     var validArticle = false;
     var articleObj;
     const url = "https://en.wikipedia.org/w/api.php?" +
         new URLSearchParams({origin: "*", action: "query", format: "json", generator: "random", grnnamespace: 0, prop: "extracts", exintro: true, explaintext: true, grnlimit: 1});
-    while (!validArticle) {
+    var attempts = 0;
+    while (!validArticle && attempts < 15) {
         try {
             const response = await fetch(url);
             const data = await response.json();
@@ -290,30 +265,26 @@ async function getRandomArticle() {
             const pageId = Object.keys(pages)[0];
             const article = pages[pageId];
 
-            articleObj = new Article(article.title, article.extract, article.link);
-            console.log(articleObj.summary)
+            articleObj = new Article(article.title, article.extract, `https://en.wikipedia.org/wiki/${article.title}`);
 
-            if (articleObj.summary.length < 500) {
+            if (articleObj.summary.length < 700 && articleObj.summary.length > 200 && !articleObj.title.includes("List of") && !articleObj.summary.includes("refer to:")) {
                 validArticle = true;
             }
 
         } catch (error) {
             console.error("Error fetching article:", error);
         }
+        attempts++;
     } 
-    console.log("length: " + articleObj.summary.length);
     return articleObj;
 }
 
+window.addEventListener('load', (event) => {
+    initGame();
+});
 
-// window.addEventListener('load', (event) => {
-//     console.log("test");
-//     initGame();
-// });
-
-
-// async function initGame() {
-//     var info = await getRandomArticle();
-//     loadNewParagraph(info.summary, 4);
-// }
+async function initGame() {
+    var article = await getRandomArticle();
+    loadNewParagraph(article);
+}
 
