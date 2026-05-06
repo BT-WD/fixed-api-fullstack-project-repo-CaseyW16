@@ -92,7 +92,7 @@ function finishTyping() {
             });
             if (moreInputRequired) {
                 submitBtn.disabled = true;
-                submitBtn.textContent = "enter a guess";
+                submitBtn.textContent = "enter a guess in the black box";
             } else {
                 submitBtn.disabled = false;
                 submitBtn.textContent = "submit guess";
@@ -210,7 +210,7 @@ submitBtn.addEventListener('click', async () => {
         var a = await getRandomArticle();
         loadNewParagraph(a)
 
-        submitBtn.textContent = "enter a guess";
+        submitBtn.textContent = "enter a guess in the black box";
         submitBtn.disabled = true;
         document.getElementById("article-link").remove();
         const realAnswers = document.querySelectorAll('.real-answer-added');
